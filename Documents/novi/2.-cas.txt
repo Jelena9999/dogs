@@ -1,0 +1,511 @@
+
+
+
+
+PROMENLJIVE U PROGRAMU
+adresa	vredn.	naziv	tip
+0x123	0xFAA	b	Broj
+0x134	0xFAA /	b1	Broj
+	0x123	pb2	kao da smo kreirali pokazivac na broj	
+0x111	3 /	i	int vrednosno prenet vrednosni tip - NE MENJA GLAVNU VREDNOST
+	0x500	pj	kao da smo kreirai pokazivac na broj
+
+
+MEMORIJA:
+adresa	vrednost
+0xFAA	{int broj: adr = 0x500 vr = 3}
+
+
+
+kod za primer je ovde:
+
+
+ class Broj
+    {
+        public int broj;
+        public Broj(int broj)
+        {
+            this.broj = broj;
+        }
+        public Broj(){ }
+        
+    }
+    class Program
+    {    
+        static void uvecaj(int i)
+        {
+            i++;
+        }
+        static void uvecaj(Broj b1)
+        {
+            b1.broj++;
+        }
+        static void uvecaj(ref int j)
+        {
+            j++;
+        }
+        static void uvecaj(ref Broj b2)
+        {
+            b2.broj++;
+        }        
+        static void Main(string[] args)
+        {
+            Broj b = new Broj(0);
+            uvecaj(b); //menja
+            uvecaj(ref b); //menja
+            uvecaj(b.broj); //ne menja
+            uvecaj(ref b.broj);//menja
+            Console.WriteLine(b.broj);            
+            
+
+        }
+
+
+
+class Broj
+    {
+        public int broj;
+        public Broj(int broj)
+        {
+            this.broj = broj;
+        }
+        public Broj(){ }
+        
+    }
+    class Program
+    {
+        static void izmeni(Broj b)
+        {
+            b = new Broj();
+        }
+        static void Main(string[] args)
+        {
+            Broj b = new Broj(5);
+            izmeni(b);
+            Console.WriteLine(b.broj);          
+
+        }
+
+    }
+OUTPUT: 5
+
+vrednost	naziv
+0x120		b
+0x300 /		b (lok)		//ovako cemo na dalje oznacavati lokalne istoimene promenljive
+
+adresa		vrednost
+0x120		5
+0x300		0	//nastao konstruktorom new Broj();
+
+da je bio referentni rpenos:
+static void izmeni(ref Broj b)
+        {
+            b = new Broj();
+        }
+        static void Main(string[] args)
+        {
+            Broj b = new Broj(5);
+            izmeni(ref b);
+            Console.WriteLine(b.broj);          
+
+        }
+OUTPUT: 0
+
+
+
+out vrsi prenos preko reference, s tom razlikom u opdnosu na ref sto deinicijalizuje promenljivu na samom pocetku
+
+ class Broj
+    {
+        public int broj;
+        public Broj(int broj)
+        {
+            this.broj = broj;
+        }
+        public Broj(){ }
+        
+    }
+    class Program
+    {
+        static void izmeni(out Broj b)
+        {
+            b.broj = 12;
+        }
+        
+        static void Main(string[] args)
+        {
+            Broj b = new Broj(5);
+            izmeni(out b);
+            Console.WriteLine(b.broj);          
+
+        }
+NE KOMPAJLIRA SE! Jer b nije inicijalizovano a pokusavamo b.broj
+
+slicna stvar kao u sledecem primeru.
+
+
+ class Broj
+    {
+        public int broj;
+        public Broj(int broj)
+        {
+            this.broj = broj;
+        }
+        public Broj(){ }
+        
+    }
+    class Program
+    {
+
+        
+        static void Main(string[] args)
+        {
+			Broj b;
+			b.broj = 12;
+        }
+ili npr.
+itn i;
+i++;
+-
+
+static void uvecaj(out int i)
+        {
+            i *= 2;
+        }
+        
+        static void Main(string[] args)
+        {
+            int x = 5;
+            uvecaj(out x);
+
+NE KOMPAJLIRA SE! jer i nije inicijalizovano
+
+
+
+Mora na oba mesta out il na oba ref
+
+Out i ref se isto tretiraju prilikom analize potpisa metode
+
+
+tj. metode
+void m(out int a);
+int m(ref int b
+IMAJU ISTI POTPIS I NMG TAJATI ZAJEDNO
+
+
+ class Broj
+    {
+        public int broj;
+        public Broj(int broj)
+        {
+            this.broj = broj;
+        }
+        public Broj(){ }
+        
+    }
+    class Program
+    {
+        static void promeni(int i)
+        {
+            i = 2;
+        }
+        
+        static void Main(string[] args)
+        {
+            int x;
+            promeni(x);
+            x = 5;
+            Console.WriteLine(x);
+
+        }
+
+
+NE KOMPAJLIRA SE! jer prosledjujemo neinicijalizovanu promenljivu
+Moglo bi jedino sa out, sa ref bi se isto ponasalo.
+
+
+
+	STRING
+
+Intern pool - cuva stringove, svi su jedinstveni. Ako se dodaje novi, prvo se pretrazuje u intern pool-u da bi se njegova adresa(tog istog ako nadje) dodelila i novom stringu. Ako ne postoji, kreira se novi zapisd u pool-u.
+
+string s1 = "abc";
+string s2 = s1;
+string s3 = "abc";
+s1 = "def";
+s2 = s1;
+s1 = "abc";
+
+promenljive:
+naziv	vrednost
+s1	1 2 1
+s2	1 2
+s3	1
+
+
+Intern pool
+adresa	vrednost
+1	"abc"
+2	"def"
+
+
+
+
+
+class Program
+    {        
+        static void Main(string[] args)
+        {
+            string s1 = "abc";
+            string s2 = s1;
+            s1 += s2;
+            if(s1 == s2)
+                Console.WriteLine(s1[4]);
+            else
+                Console.WriteLine(s2[4]);
+
+
+
+        }
+
+GRESKA! Ne postoji s2[4] jer je s2 "abc"
+
+class Program
+    {        
+        static void Main(string[] args)
+        {
+            string s1 = "abc";
+            string s2 = s1;
+            s1 += s2;
+            if(s1 == s2)
+                Console.WriteLine(s1[4]);
+            else
+                Console.WriteLine(s2[4]);
+
+
+
+        }
+OUTPUT: b
+
+
+
+
+ class Program
+    {     
+        static void metoda(string s)
+        {
+            s += "abc";
+        }
+        static void Main(string[] args)
+        {
+            string s1 = "abc";
+            metoda(s1);
+            Console.WriteLine(s1);
+
+
+OUTPUT: "abc"
+
+promenljive:
+naziv	vrednost
+s1	2
+
+
+Intern pool
+adresa	vrednost
+1	"abc"
+2	"abcabc"
+
+
+
+	ENUM
+
+Numericki tip za kolekciju konstanti. Svaka konstanta ima dodeljenu neku vrednost. o defaultu su redom od 0 na dalje, ali mozemo i sami definisati. Ako definisemo sami jednu, a sledecoj nismo definisali, ona je automatski za 1 veca.
+
+mogu da se nadju u klasi, mogu i u namespace-u
+
+Svaka nedodeljena vrednost, defaultom uzima za jedan veci od prethodne. Ukoliko ta vrednost nije slobodna, nece uzeti neku drugu, nego ta konstanta enuma nece ni postojati - kao sto se desava za OM u primeru #primer
+
+
+enum Smer
+    {
+        ISIT,
+        MO,
+        OM,
+        UK
+    }
+    class Program
+    {     
+        static void metoda(ref string s)
+        {
+            s += "abc";
+        }
+        static void Main(string[] args)
+        {
+            Smer s = Smer.ISIT;
+            if(s+1 == Smer.MO)
+                Console.WriteLine(s+2);
+            else
+                Console.WriteLine(s+3);
+
+
+
+        }
+
+OUTPUT: OM
+
+Primer za prebrisavanje vrednosti i za vezbu - test
+
+  enum Smer
+    {// #primer
+        ISIT = 3,
+        MO = 2,
+        OM,
+        UK = 5
+    }
+    class Program
+    {     
+        static void metoda(ref string s)
+        {
+            s += "abc";
+        }
+        static void Main(string[] args)
+        {
+            Smer s = 0;
+            for (int i = 0; i < 10; i++, s++)
+                Console.WriteLine(i+"\t"+s);
+            
+
+
+ENUM JE VREDNOSNI TIP
+
+
+Sabiranje enuma nije moguce
+Sabiranjem enuma i inta dobija se enum
+sabiranjem inta i inta dobija se int
+
+
+
+   enum Smer
+    {
+        ISIT = 3,
+        MO = 2,
+        OM,
+        UK = 5
+    }
+    class Program
+    {     
+        static void metoda(ref string s)
+        {
+            s += "abc";
+        }
+        static void Main(string[] args)
+        {
+            Smer s1 = Smer.ISIT;
+            Smer s2 = Smer.MO;
+            Console.WriteLine(s1+(int)s2);
+            
+
+
+
+
+Promenljiva definisana u nekom bloku koda, vidi se samo iz tog brloka koda - DOSEG PROMENLJIVE i postoji samo dok se taj blok izvrsava - ZIVOTNI VEK.
+
+
+
+for (int i = 0; i < 6; i++) { }
+Console.WriteLine(i);
+
+NE KOMPAJLIRA SE! ne moze da pristupi i 
+
+
+int i;
+            for (i = 0; i < 6; i++) { }
+            Console.WriteLine(i); 
+
+
+
+static void Main(string[] args)
+        {
+            int i;
+            for (i = 0; i < 6; i++)
+            {
+                int j = i;
+                while (j < 2 * i) j++;
+                Console.WriteLine(j);
+            }
+            Console.WriteLine(i);     
+
+0 2 4 6 8 10 6
+
+
+
+static void Main(string[] args)
+        {
+            int i;
+            for (i = 0; i < 6; i++)
+            {                
+                { int j = 2; }
+                j++;                
+            }
+            
+
+NE KOMPAJLIRA SE!
+Jer j ima doseg u okviru svog bloka koda	 
+
+
+class Program
+    {         
+        static void Main(string[] args)
+        {
+            int x = 0, y = 10, suma = 0;
+            while ((x+=2) <= (y/=2))
+                for (int i = x; i <= y; i++)
+                    suma += i;
+            Console.WriteLine(x * y * suma);
+            
+
+112
+
+dodatne metode
+for (int i = 2; i < 100; i*=i)
+         {
+                int j = i;
+                while (j < 100 * i) j++;
+                Console.WriteLine(j);
+            }
+200
+400
+1600
+
+ static void Main(string[] args)
+        {
+            for (int i = 0; i < 100; i+=11)
+            {
+                int j = 6*i;
+                while (j < 100 * i) j+=3;
+                Console.WriteLine(j);
+            }
+        }
+0
+1101
+2202
+3300
+4401
+5502
+6600
+7701
+8802
+9900
+
+
+
+
+
+
+
+
+
+
+
+
+
